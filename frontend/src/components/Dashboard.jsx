@@ -11,7 +11,7 @@ const mockData = {
 
 function Dashboard() {
   const [selectedCountry, setSelectedCountry] = useState('USA');
-  const [selectedDataset, setSelectedDataset] = useState('integralMetric');
+  const [selectedDataset, setSelectedDataset] = useState('lifeExpectancy');
   const [selectedMapType, setSelectedMapType] = useState('world');
 
   const [sliderValues, setSliderValues] = useState({
@@ -154,11 +154,11 @@ function Dashboard() {
   return (
     <div style={{ ...containerStyle, gap: '0px', padding: '10px' }}>
       <div style={{ ...chartContainerStyle }}>
-        <div style={{ ...placeholderStyle, height: '12.5vh', width: 'calc(100vw - 20px)' }}>
+        <div style={{ ...placeholderStyle, height: '12.5vh', width: 'calc(100vw - 20px)', justifyContent: 'flex-start', textAlign: 'left'  }}>
 
           {/* Top Section */}
-          <div style={{ backgroundColor: '#e0e0e0', padding: '10px', borderRadius: '8px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+          <div style={{ backgroundColor: '#e0e0e0', padding: '10px', borderRadius: '8px', display: 'flex'}}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '20px'}}>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                 <span style={{ margin: '0', fontSize: '1.5em', color: '#333', textAlign: 'left' }}>
                   World Data Dashboard

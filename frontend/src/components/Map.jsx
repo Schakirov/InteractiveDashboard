@@ -1,17 +1,42 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, GeoJSON } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import countries from '../data/countries_big_w_names.json';
+import lifeExpectancyData from '../data/lifeExpectancy.json';
 
 function Map({ onCountryClick }) {
+  const [lifeExpectancy, setLifeExpectancy] = useState(null); // Start with null to check readiness
+
+  // Load the life expectancy data into state (useEffect for possible async setup)
+  useEffect(() => {
+    setLifeExpectancy(lifeExpectancyData);
+  }, []);
+
+  // Utility function to calculate color based on life expectancy
+  const getLifeExpectancyColor = (value) => {
+    if (value === undefined) return '#e0e0e0'; // Default color for missing data
+
+    // Map value range to blue shades (min: dark blue, max: light blue)
+    const minLifeExpectancy = 50; // Assume minimum life expectancy
+    const maxLifeExpectancy = 85; // Assume maximum life expectancy
+    const colorScale = (value - minLifeExpectancy) / (maxLifeExpectancy - minLifeExpectancy);
+
+    // Interpolate between dark blue (#08306b) and light blue (#ccece6)
+    const darkBlue = [203, 252, 199]; 
+    const lightBlue = [255, 152, 152]; // RGB forrgb(204, 236, 208)
+    const color = darkBlue.map((dark, i) => {
+      const light = lightBlue[i];
+      return Math.round(light + (dark - light) * colorScale);
+    });
+
+    return `rgb(${color.join(',')})`;
+  };
+
   // Dynamic styling based on life expectancy
   const mapStyle = (feature) => {
-    const lifeExpectancy = feature.properties.LIFE_EXPECTANCY || 0;
-    let color = '#C9DAF8'; // Default color
-
-    if (lifeExpectancy > 75) color = '#31a354';
-    else if (lifeExpectancy > 50) color = '#addd8e';
-    else if (lifeExpectancy > 25) color = '#f03b20';
+    const countryCode = feature.id; 
+    const value = lifeExpectancy?.[countryCode];
+    const color = getLifeExpectancyColor(value);
 
     return {
       color: '#000',  // Border color
@@ -24,7 +49,12 @@ function Map({ onCountryClick }) {
   // Event handling for hover and click
   const onEachCountry = (feature, layer) => {
     const countryName = feature.properties.name;
-    layer.bindPopup(countryName);
+    const countryCode = feature.id;
+    const value = lifeExpectancy?.[countryCode];
+    console.log('Feature ID:', feature.id, 'Country Code:', countryCode, 'Value:', value);
+    const displayValue = value !== undefined ? `${value} years` : 'No data';
+
+    layer.bindPopup(`${countryName}: ${displayValue}`);
 
     layer.on({
       mouseover: (e) => {
@@ -41,6 +71,11 @@ function Map({ onCountryClick }) {
       click: () => onCountryClick(countryName),
     });
   };
+
+  // Prevent rendering the map until lifeExpectancy is ready
+  if (!lifeExpectancy) {
+    return <div>Loading map data...</div>;
+  }
 
   return (
     <MapContainer 
